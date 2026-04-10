@@ -1,0 +1,473 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)}
+.plan-header{padding:1.5rem 1.5rem 1rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.plan-title{font-size:20px;font-weight:500;margin-bottom:4px}
+.plan-subtitle{font-size:13px;color:var(--color-text-secondary)}
+.tab-bar{display:flex;gap:4px;padding:1rem 1.5rem 0;border-bottom:0.5px solid var(--color-border-tertiary);flex-wrap:wrap}
+.tab{padding:8px 14px;font-size:13px;cursor:pointer;border-radius:var(--border-radius-md) var(--border-radius-md) 0 0;border:0.5px solid transparent;color:var(--color-text-secondary);background:transparent}
+.tab.active{border-color:var(--color-border-secondary);border-bottom-color:var(--color-background-primary);background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500}
+.content{padding:1.5rem}
+.section{display:none}
+.section.active{display:block}
+.metrics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.metric-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px 16px}
+.metric-label{font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.metric-value{font-size:22px;font-weight:500}
+.metric-sub{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
+.metric-value.warn{color:var(--color-text-warning)}
+.info-banner{border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:1.5rem;border:0.5px solid var(--color-border-info);background:var(--color-background-info)}
+.info-title{font-size:14px;font-weight:500;color:var(--color-text-info);margin-bottom:4px}
+.info-desc{font-size:13px;color:var(--color-text-secondary);line-height:1.6}
+.week-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.week-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px;cursor:pointer;transition:border-color .15s}
+.week-card:hover{border-color:var(--color-border-secondary)}
+.week-card.selected{border-color:var(--color-border-info);background:var(--color-background-info)}
+.week-label{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.week-card.selected .week-label{color:var(--color-text-info)}
+.week-theme{font-size:13px;font-weight:500;line-height:1.4}
+.week-card.selected .week-theme{color:var(--color-text-info)}
+.week-nums{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.week-badge{font-size:11px;padding:2px 7px;border-radius:99px;background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.week-card.selected .week-badge{background:rgba(0,0,0,.06);color:var(--color-text-info)}
+.week-detail{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem}
+.week-detail-title{font-size:15px;font-weight:500;margin-bottom:1rem}
+.checklist{list-style:none}
+.checklist li{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:13px;border-bottom:0.5px solid var(--color-border-tertiary);line-height:1.5}
+.checklist li:last-child{border-bottom:none}
+.check-box{width:16px;height:16px;border:1.5px solid var(--color-border-secondary);border-radius:4px;flex-shrink:0;cursor:pointer;margin-top:1px;display:flex;align-items:center;justify-content:center}
+.check-box.done{background:var(--color-background-success);border-color:var(--color-border-success)}
+.check-box.done::after{content:'';display:block;width:4px;height:7px;border:1.5px solid var(--color-text-success);border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px)}
+.check-text.done{text-decoration:line-through;color:var(--color-text-tertiary)}
+.notes-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:1rem}
+.notes-block{display:flex;flex-direction:column;gap:6px}
+.notes-label{font-size:12px;font-weight:500;color:var(--color-text-secondary);display:flex;align-items:center;gap:6px}
+.notes-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.notes-area{width:100%;min-height:100px;padding:10px 12px;font-size:13px;font-family:var(--font-sans);color:var(--color-text-primary);background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);resize:vertical;line-height:1.6}
+.notes-area:focus{outline:none;border-color:var(--color-border-primary)}
+.notes-area::placeholder{color:var(--color-text-tertiary)}
+.notes-saved{font-size:11px;color:var(--color-text-success);opacity:0;transition:opacity .3s}
+.notes-saved.show{opacity:1}
+.activity-panel{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1.5rem}
+.activity-header{background:var(--color-background-secondary);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.activity-header-text{font-size:13px;font-weight:500}
+.activity-header-sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.activity-body{padding:1.25rem;display:none}
+.activity-body.open{display:block}
+.pain-funnel{display:flex;flex-direction:column;gap:8px}
+.funnel-level{border-radius:var(--border-radius-md);padding:12px 16px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary)}
+.funnel-level-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.funnel-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.funnel-level-title{font-size:13px;font-weight:500}
+.funnel-level-desc{font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;line-height:1.5}
+.funnel-questions{list-style:none}
+.funnel-questions li{font-size:12px;color:var(--color-text-secondary);padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary);line-height:1.5;padding-left:12px;position:relative}
+.funnel-questions li::before{content:'"';position:absolute;left:0;color:var(--color-text-tertiary)}
+.funnel-questions li:last-child{border-bottom:none}
+.obj-panel-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1.5rem}
+.obj-panel-header{background:var(--color-background-secondary);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.obj-panel-header-text{font-size:13px;font-weight:500}
+.obj-panel-header-sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.obj-panel-body{display:none}
+.obj-panel-body.open{display:block}
+.objection-row{padding:12px 16px;border-top:0.5px solid var(--color-border-tertiary);cursor:pointer}
+.objection-row:hover{background:var(--color-background-secondary)}
+.objection-q{font-size:13px;font-weight:500}
+.objection-context{font-size:12px;color:var(--color-text-secondary);margin-top:3px;font-style:italic}
+.objection-toggle{font-size:11px;color:var(--color-text-info);margin-top:4px}
+.objection-a{font-size:12px;color:var(--color-text-secondary);line-height:1.6;margin-top:8px;display:none;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)}
+.objection-a.open{display:block}
+.objection-a-label{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.pkg-tabs{display:flex;gap:0;margin-bottom:1rem;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden}
+.pkg-tab{flex:1;padding:8px 12px;font-size:12px;font-weight:500;cursor:pointer;text-align:center;background:var(--color-background-primary);color:var(--color-text-secondary);border:none;border-right:0.5px solid var(--color-border-tertiary)}
+.pkg-tab:last-child{border-right:none}
+.pkg-tab.active{background:var(--color-background-info);color:var(--color-text-info)}
+.pkg-scenario{display:none}
+.pkg-scenario.active{display:block}
+.sec-heading{font-size:15px;font-weight:500;margin-bottom:12px;margin-top:1.5rem}
+.sec-heading:first-child{margin-top:0}
+.table-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1.5rem}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+thead th{background:var(--color-background-secondary);padding:10px 14px;text-align:left;font-weight:500;font-size:12px;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
+tbody td{padding:9px 14px;border-bottom:0.5px solid var(--color-border-tertiary);word-wrap:break-word}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--color-background-secondary)}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:500}
+.tag.warn{background:var(--color-background-warning);color:var(--color-text-warning)}
+.tag.danger{background:var(--color-background-danger);color:var(--color-text-danger)}
+.tag.success{background:var(--color-background-success);color:var(--color-text-success)}
+.tag.info{background:var(--color-background-info);color:var(--color-text-info)}
+.tracker-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.tracker-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px}
+.tracker-card-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;font-weight:500}
+.tracker-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.tracker-nums{font-size:13px;color:var(--color-text-secondary)}
+.progress-bar{height:8px;background:var(--color-background-secondary);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width .4s}
+.fill-success{background:var(--color-text-success)}
+.fill-warning{background:var(--color-text-warning)}
+.fill-danger{background:var(--color-text-danger)}
+.input-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.input-row label{font-size:13px;color:var(--color-text-secondary);min-width:150px}
+.input-row input[type=number]{width:100px;padding:6px 10px;font-size:13px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.daily-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.daily-item{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px 14px}
+.daily-activity{font-size:13px;font-weight:500;margin-bottom:3px}
+.daily-req{font-size:12px;color:var(--color-text-secondary)}
+.pip-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1.5rem}
+.pip-criteria{list-style:none;margin-top:10px}
+.pip-criteria li{font-size:13px;color:var(--color-text-secondary);padding:5px 0;padding-left:16px;position:relative;border-bottom:0.5px solid var(--color-border-tertiary);line-height:1.5}
+.pip-criteria li:last-child{border-bottom:none}
+.pip-criteria li::before{content:'—';position:absolute;left:0;color:var(--color-text-warning)}
+.outcome-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.outcome-card{border-radius:var(--border-radius-lg);padding:14px;border:0.5px solid}
+.outcome-card.success{background:var(--color-background-success);border-color:var(--color-border-success)}
+.outcome-card.warn{background:var(--color-background-warning);border-color:var(--color-border-warning)}
+.outcome-label{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.outcome-label.success{color:var(--color-text-success)}
+.outcome-label.warn{color:var(--color-text-warning)}
+.outcome-body{font-size:12px;color:var(--color-text-secondary);line-height:1.6}
+.sig-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.sig-line{border-bottom:1.5px solid var(--color-border-primary);min-height:36px;margin-bottom:6px}
+.sig-label{font-size:11px;color:var(--color-text-secondary)}
+@media(max-width:600px){
+  .metrics-grid,.week-grid,.notes-grid{grid-template-columns:1fr}
+  .tracker-grid,.daily-grid,.outcome-grid,.sig-grid{grid-template-columns:1fr}
+}
+</style>
+
+<h2 class="sr-only">30-Day AE Aggressive Coaching Plan — interactive dashboard with week-by-week coaching tasks, roleplay activities, weekly notes for manager and rep, progress tracker, and Day 30 review.</h2>
+
+<div class="plan-header">
+  <div class="plan-title">30-day AE coaching plan</div>
+  <div class="plan-subtitle">MoeGo Pay &nbsp;·&nbsp; Inbound role &nbsp;·&nbsp; Quota: $8,000 MRR &nbsp;·&nbsp; 36 deals &nbsp;·&nbsp; 90% hardware attach &nbsp;·&nbsp; 48 demos/mo</div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab active" onclick="showTab('overview',this)">Overview</button>
+  <button class="tab" onclick="showTab('coaching',this)">Coaching plan</button>
+  <button class="tab" onclick="showTab('tracker',this)">Progress tracker</button>
+  <button class="tab" onclick="showTab('day30',this)">Day 30 review</button>
+  <button class="tab" onclick="showTab('signoff',this)">Sign-off</button>
+</div>
+
+<div class="content">
+
+  <div id="tab-overview" class="section active">
+    <div class="metrics-grid">
+      <div class="metric-card"><div class="metric-label">Monthly MRR target</div><div class="metric-value">$8,000</div><div class="metric-sub">~$267/day</div></div>
+      <div class="metric-card"><div class="metric-label">Deals required</div><div class="metric-value">36</div><div class="metric-sub">avg $157/deal</div></div>
+      <div class="metric-card"><div class="metric-label">Hardware attach</div><div class="metric-value">90%</div><div class="metric-sub">≥9 of 10 deals</div></div>
+      <div class="metric-card"><div class="metric-label">Monthly demos</div><div class="metric-value">48</div><div class="metric-sub">12 demos/week</div></div>
+      <div class="metric-card"><div class="metric-label">Show rate target</div><div class="metric-value">≥75%</div><div class="metric-sub">track from day 1</div></div>
+      <div class="metric-card"><div class="metric-label">Consecutive misses</div><div class="metric-value warn">3 months</div><div class="metric-sub">triggers this plan</div></div>
+    </div>
+    <div class="info-banner">
+      <div class="info-title">Purpose of this plan</div>
+      <div class="info-desc">This is a structured 30-day coaching plan designed to provide the AE with intensive support, clear expectations, and the resources needed to return to quota attainment. The focus is on inbound lead management, demo execution, pipeline decisioning, and closing mechanics — not punitive action.</div>
+    </div>
+    <div class="sec-heading">Weekly pacing targets</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:22%">Metric</th><th style="width:17%">Week 1</th><th style="width:17%">Week 2</th><th style="width:17%">Week 3</th><th style="width:17%">Week 4</th><th style="width:10%">Total</th></tr></thead>
+        <tbody>
+          <tr><td>Demos completed</td><td>10</td><td>12</td><td>13</td><td>13</td><td><strong>48</strong></td></tr>
+          <tr><td>Deals closed</td><td>8</td><td>9</td><td>10</td><td>9</td><td><strong>36</strong></td></tr>
+          <tr><td>MRR generated</td><td>$1,800</td><td>$2,000</td><td>$2,200</td><td>$2,000</td><td><strong>$8,000</strong></td></tr>
+          <tr><td>Hardware attach</td><td>≥90%</td><td>≥90%</td><td>≥90%</td><td>≥90%</td><td><strong>≥90%</strong></td></tr>
+          <tr><td>Show rate</td><td>Track</td><td>≥70%</td><td>≥75%</td><td>≥75%</td><td><strong>≥75%</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="tab-coaching" class="section">
+    <div class="sec-heading" style="margin-top:0">Select a week to view coaching focus, tasks &amp; notes</div>
+    <div class="week-grid" id="week-grid">
+      <div class="week-card selected" onclick="selectWeek(0,this)">
+        <div class="week-label">Week 1</div><div class="week-theme">Foundation reset</div>
+        <div class="week-nums"><span class="week-badge">10 demos</span><span class="week-badge">8 deals</span></div>
+      </div>
+      <div class="week-card" onclick="selectWeek(1,this)">
+        <div class="week-label">Week 2</div><div class="week-theme">Lead quality &amp; conversion</div>
+        <div class="week-nums"><span class="week-badge">12 demos</span><span class="week-badge">9 deals</span></div>
+      </div>
+      <div class="week-card" onclick="selectWeek(2,this)">
+        <div class="week-label">Week 3</div><div class="week-theme">Closing mechanics</div>
+        <div class="week-nums"><span class="week-badge">13 demos</span><span class="week-badge">10 deals</span></div>
+      </div>
+      <div class="week-card" onclick="selectWeek(3,this)">
+        <div class="week-label">Week 4</div><div class="week-theme">Full execution</div>
+        <div class="week-nums"><span class="week-badge">13 demos</span><span class="week-badge">9 deals</span></div>
+      </div>
+    </div>
+    <div class="week-detail" id="week-detail"></div>
+    <div id="week-activities"></div>
+    <div id="week-notes"></div>
+
+    <div class="sec-heading">Daily activity expectations</div>
+    <div class="info-banner" style="margin-bottom:1rem">
+      <div class="info-title">Inbound role — activity guidance</div>
+      <div class="info-desc">This is an inbound role. Focus is on speed-to-contact on inbound leads, demo scheduling quality, follow-up cadence, and maximising conversion from the existing pipeline.</div>
+    </div>
+    <div class="daily-grid">
+      <div class="daily-item"><div class="daily-activity">Inbound lead response</div><div class="daily-req">Contact every new lead within 5 minutes of assignment</div></div>
+      <div class="daily-item"><div class="daily-activity">Demo scheduling</div><div class="daily-req">Book demo on first or second contact — same-day where possible</div></div>
+      <div class="daily-item"><div class="daily-activity">Demo confirmation</div><div class="daily-req">Confirm all demos 24 hrs in advance via call + message</div></div>
+      <div class="daily-item"><div class="daily-activity">Post-demo follow-up</div><div class="daily-req">Send follow-up within 2 hours of every demo</div></div>
+      <div class="daily-item"><div class="daily-activity">Open pipeline</div><div class="daily-req">Touch every open opportunity daily — no deal goes cold</div></div>
+      <div class="daily-item"><div class="daily-activity">CRM logging</div><div class="daily-req">All activity and notes logged in CRM before EOD</div></div>
+    </div>
+
+    <div class="sec-heading">Check-in schedule</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:20%">Timing</th><th style="width:20%">Format</th><th style="width:35%">Agenda</th><th style="width:25%">Output</th></tr></thead>
+        <tbody>
+          <tr><td>End of Week 1</td><td>30-min progress check-in</td><td>Pipeline categorisation review, call recording debrief, early wins &amp; blockers</td><td>Written summary</td></tr>
+          <tr><td>End of Week 2</td><td>30-min progress check-in</td><td>KPI pacing, demo conversion review, show rate check</td><td>Written summary</td></tr>
+          <tr><td>Day 14</td><td>45-min check-in</td><td>Mid-point pacing vs. targets, course corrections</td><td>Status memo</td></tr>
+          <tr><td>End of Week 3</td><td>30-min progress check-in</td><td>Closing velocity, hardware attach rate, pipeline health</td><td>Written summary</td></tr>
+          <tr><td>Day 30</td><td>60-min formal review</td><td>Full plan results, next steps decision</td><td><span class="tag info">Signed outcome form</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="tab-tracker" class="section">
+    <div class="sec-heading" style="margin-top:0">Enter current actuals</div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1.5rem">
+      <div class="input-row"><label>MRR closed ($)</label><input type="number" id="inp-mrr" value="0" min="0" oninput="updateTracker()"></div>
+      <div class="input-row"><label>Deals closed</label><input type="number" id="inp-deals" value="0" min="0" oninput="updateTracker()"></div>
+      <div class="input-row"><label>Ultimate deals sold</label><input type="number" id="inp-ultimate" value="0" min="0" oninput="updateTracker()"></div>
+      <div class="input-row"><label>Demos completed</label><input type="number" id="inp-demos" value="0" min="0" oninput="updateTracker()"></div>
+      <div class="input-row"><label>Hardware attach (%)</label><input type="number" id="inp-attach" value="0" min="0" max="100" oninput="updateTracker()"></div>
+      <div class="input-row"><label>Show rate (%)</label><input type="number" id="inp-show" value="0" min="0" max="100" oninput="updateTracker()"></div>
+    </div>
+    <div class="tracker-grid" id="tracker-grid"></div>
+    <div class="sec-heading">Coaching flag</div>
+    <div id="coaching-flag"></div>
+  </div>
+
+  <div id="tab-day30" class="section">
+    <div class="sec-heading" style="margin-top:0">Day 30 review outcomes</div>
+    <div class="outcome-grid">
+      <div class="outcome-card success">
+        <div class="outcome-label success">Plan complete</div>
+        <div class="outcome-body">Full quota met — $8,000 MRR, 36 deals, ≥90% hardware attach, 48 demos. Coaching plan closed. AE returns to standard performance management.</div>
+      </div>
+      <div class="outcome-card warn">
+        <div class="outcome-label warn">Escalate to performance plan</div>
+        <div class="outcome-body">If targets are not met, manager determines whether to extend coaching, restructure support, or escalate to a formal 30-day performance improvement plan.</div>
+      </div>
+    </div>
+    <div class="pip-wrap">
+      <div style="font-size:14px;font-weight:500;margin-bottom:4px">Escalation to a performance plan — considerations</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.6">If the Day 30 review reveals sustained underperformance, a formal performance improvement plan may be initiated. The following factors inform that decision:</div>
+      <ul class="pip-criteria">
+        <li>MRR closed below $6,400 (80% of quota) at end of Day 30</li>
+        <li>Fewer than 29 deals closed (80% of the 36-deal target)</li>
+        <li>Hardware attach rate below 85% for the month</li>
+        <li>Fewer than 38 demos completed across the 30-day period</li>
+        <li>Show rate consistently below 65% despite coaching interventions</li>
+        <li>Repeated failure to follow daily activity expectations or check-in cadence</li>
+        <li>No measurable improvement in identified skill gaps across the 4 weeks</li>
+      </ul>
+    </div>
+    <div class="sec-heading">Day 30 review agenda</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:30%">Topic</th><th style="width:70%">Detail</th></tr></thead>
+        <tbody>
+          <tr><td>Results review</td><td>Walk through actuals vs. all KPI targets for the full 30 days</td></tr>
+          <tr><td>Skill assessment</td><td>Manager scores AE on demo delivery, discovery, objection handling, and hardware attach</td></tr>
+          <tr><td>Behavioral compliance</td><td>Review CRM logging consistency, check-in attendance, and follow-up cadence</td></tr>
+          <tr><td>AE self-assessment</td><td>AE shares their own perspective on progress, blockers, and what support they need</td></tr>
+          <tr><td>Decision &amp; next steps</td><td>Manager confirms outcome: plan closed, extended, or escalated to performance plan</td></tr>
+          <tr><td>Documentation</td><td>Both parties sign Day 30 outcome form before close of meeting</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="tab-signoff" class="section">
+    <div class="info-banner">
+      <div class="info-title">Acknowledgment</div>
+      <div class="info-desc">By signing, the AE confirms they have read and understood this coaching plan — including the expectations, check-in schedule, and what happens at the Day 30 review. Signing does not imply agreement with the assessment, only receipt of the plan.</div>
+    </div>
+    <div class="sec-heading">Plan details</div>
+    <div class="table-wrap" style="margin-bottom:1.5rem">
+      <table>
+        <thead><tr><th style="width:35%">Field</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Account executive</td><td><input type="text" placeholder="Full name" style="border:none;background:transparent;width:100%;font-size:13px;color:var(--color-text-primary);outline:none"></td></tr>
+          <tr><td>Manager</td><td><input type="text" placeholder="Full name" style="border:none;background:transparent;width:100%;font-size:13px;color:var(--color-text-primary);outline:none"></td></tr>
+          <tr><td>Plan start date</td><td><input type="date" style="border:none;background:transparent;font-size:13px;color:var(--color-text-primary);outline:none"></td></tr>
+          <tr><td>Day 14 check-in date</td><td><input type="date" style="border:none;background:transparent;font-size:13px;color:var(--color-text-primary);outline:none"></td></tr>
+          <tr><td>Day 30 review date</td><td><input type="date" style="border:none;background:transparent;font-size:13px;color:var(--color-text-primary);outline:none"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sec-heading">Signatures</div>
+    <div class="sig-grid">
+      <div><div class="sig-line"></div><div class="sig-label">Account executive</div><div class="sig-line" style="margin-top:1rem;height:20px"></div><div class="sig-label">Date</div></div>
+      <div><div class="sig-line"></div><div class="sig-label">Manager</div><div class="sig-line" style="margin-top:1rem;height:20px"></div><div class="sig-label">Date</div></div>
+    </div>
+    <div style="margin-top:2rem;padding-top:1rem;border-top:0.5px solid var(--color-border-tertiary);font-size:11px;color:var(--color-text-tertiary);text-align:center">Confidential — for internal use only</div>
+  </div>
+
+</div>
+
+<script>
+const weekData=[
+  {title:"Week 1: foundation reset",items:["Categorise every open opportunity as Closing Call, Close-Lost, or No Show","Send 1 recorded demo call to manager for conversion coaching and feedback","Re-establish show rate habits: confirm every demo 24 hrs out via call and message","Identify top 3 demo delivery weaknesses and practice with manager via role-play","End-of-week progress check-in with manager — bring pipeline categorisation summary"],activities:[]},
+  {title:"Week 2: lead quality & conversion",items:["Hit 12+ demos this week — demo volume is the primary lever in an inbound role","Complete pain funnel discovery activity with manager (see below)","Roleplay MoeGo Pay attach objections with manager — all 4 scenarios (see below)","Show rate target: ≥70% — review no-show patterns and adjust confirmation approach","End-of-week progress check-in with manager — bring KPI pacing summary"],activities:["pain","objection"]},
+  {title:"Week 3: closing mechanics",items:["Every completed demo this week must move to Closing Call, Closed Won, or Closed Lost — no demos left in limbo","Complete challenger closing roleplay with manager — all 4 delay scenarios (see below)","Manager joins 2 live demos for real-time feedback","Any deal stalled more than 10 days must be escalated or decisioned — no zombies","CRM audit: pipeline must reflect real status, nothing inflated","Show rate target: ≥75% — no regressions from Week 2"],activities:["challenger"]},
+  {title:"Week 4: full execution",items:["Deliver full quota output — deals, demos, MRR, and attach rate all at target","Hardware attach must hit ≥90% on every deal closed this week","Complete package sell roleplay with manager — Ultimate vs Growth & Growth vs Basic (see below)","Complete written self-assessment before Day 30 review meeting","Bring deal-by-deal pipeline summary to Day 30 review","Day 30 formal review: manager + AE assess results and determine next steps"],activities:["packages"]}
+];
+
+const checks=weekData.map(w=>w.items.map(()=>false));
+const notes={manager:['','','',''],rep:['','','','']};
+let activeWeek=0;
+
+function renderNotes(idx){
+  return `<div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1.5rem">
+    <div style="background:var(--color-background-secondary);padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary)">
+      <div style="font-size:13px;font-weight:500">Week ${idx+1} notes</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px">Saved automatically as you type</div>
+    </div>
+    <div style="padding:1.25rem">
+      <div class="notes-grid">
+        <div class="notes-block">
+          <div class="notes-label"><div class="notes-dot" style="background:#185FA5"></div>Manager notes</div>
+          <textarea class="notes-area" id="notes-manager-${idx}" placeholder="Observations, coaching points, patterns noticed this week…" oninput="saveNote(${idx},'manager',this.value)">${notes.manager[idx]}</textarea>
+        </div>
+        <div class="notes-block">
+          <div class="notes-label"><div class="notes-dot" style="background:#3B6D11"></div>Rep notes</div>
+          <textarea class="notes-area" id="notes-rep-${idx}" placeholder="Wins, challenges, questions for check-in, what I need help with…" oninput="saveNote(${idx},'rep',this.value)">${notes.rep[idx]}</textarea>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11px;color:var(--color-text-tertiary)">Notes are kept while this session is open</span>
+        <span class="notes-saved" id="notes-saved-${idx}">Saved</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function saveNote(idx,role,val){
+  notes[role][idx]=val;
+  const el=document.getElementById('notes-saved-'+idx);
+  if(el){el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1500);}
+}
+
+const painFunnelHTML=`<div class="activity-panel"><div class="activity-header" onclick="togglePanel('pain')"><div><div class="activity-header-text">Pain funnel discovery activity</div><div class="activity-header-sub">Practice these questions in sequence during discovery</div></div><span id="pain-arrow" style="font-size:18px;color:var(--color-text-secondary);font-weight:300">+</span></div><div class="activity-body" id="pain-body"><p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem;line-height:1.6">The pain funnel moves the prospect from surface-level awareness to emotional ownership of their problem. Work through each level in order. Don't skip to the solution until you've reached the bottom.</p><div class="pain-funnel"><div class="funnel-level"><div class="funnel-level-header"><div class="funnel-dot" style="background:#378ADD"></div><div class="funnel-level-title">Level 1 — situation questions</div></div><div class="funnel-level-desc">Establish context before probing for pain.</div><ul class="funnel-questions"><li>How are you currently managing appointment scheduling and client payments?</li><li>How many groomers or stylists are on your team right now?</li><li>What tools or software are you using today to run the business?</li></ul></div><div class="funnel-level"><div class="funnel-level-header"><div class="funnel-dot" style="background:#EF9F27"></div><div class="funnel-level-title">Level 2 — problem questions</div></div><div class="funnel-level-desc">Surface friction. Get them talking about what isn't working.</div><ul class="funnel-questions"><li>What's the most time-consuming part of managing your day-to-day operations?</li><li>Are there gaps in how you track client history or rebooking?</li><li>How often do you deal with no-shows or last-minute cancellations?</li><li>Is collecting payment ever awkward or inconsistent?</li></ul></div><div class="funnel-level"><div class="funnel-level-header"><div class="funnel-dot" style="background:#D85A30"></div><div class="funnel-level-title">Level 3 — implication questions</div></div><div class="funnel-level-desc">Expand the pain. Help them see the downstream cost of the problem.</div><ul class="funnel-questions"><li>When a no-show happens, what does that cost you in lost revenue that day?</li><li>If a client doesn't rebook, how often do you lose them entirely?</li><li>How much time per week goes into admin that could be automated?</li><li>Has the payment process ever caused a bad review or a client not to return?</li></ul></div><div class="funnel-level"><div class="funnel-level-header"><div class="funnel-dot" style="background:#3B6D11"></div><div class="funnel-level-title">Level 4 — need-payoff questions</div></div><div class="funnel-level-desc">Get them to articulate the value of solving the problem in their own words.</div><ul class="funnel-questions"><li>If you could eliminate no-shows by 80%, what would that mean for monthly revenue?</li><li>How much would it change things if your team could focus on grooming instead of admin?</li><li>If payment was seamless and built into the booking flow, how would that affect the client experience?</li><li>What would it mean for your business if you had all of this in one place?</li></ul></div></div></div></div>`;
+
+const objectionHTML=`<div class="obj-panel-wrap"><div class="obj-panel-header" onclick="togglePanel('obj')"><div><div class="obj-panel-header-text">MoeGo Pay hardware attach — objection roleplay</div><div class="obj-panel-header-sub">Manager plays the prospect — click to expand all 4 scenarios</div></div><span id="obj-arrow" style="font-size:18px;color:var(--color-text-secondary);font-weight:300">+</span></div><div class="obj-panel-body" id="obj-body"><div class="objection-row" onclick="toggleObj(this)"><div class="objection-q">We already have a card reader — we don't need another one.</div><div class="objection-toggle">Show coaching response</div><div class="objection-a">Totally understand — a lot of our customers said the same thing before switching. The difference with MoeGo Pay hardware is that it's built into the same system you're using for bookings, client history, and no-show protection. That means no manual reconciliation, no split systems, and your team doesn't have to touch two different devices. It's one less thing to manage. Can I show you how that looks in practice?</div></div><div class="objection-row" onclick="toggleObj(this)"><div class="objection-q">I'm locked into a contract with my current payment processor.</div><div class="objection-toggle">Show coaching response</div><div class="objection-a">That's worth understanding — when does that contract come up for renewal? In some cases the savings from switching to MoeGo Pay actually offset the exit fee. Either way, we can set this up now and time the payment side to align with your renewal so there's no overlap cost. Would it help to look at what the numbers would actually look like?</div></div><div class="objection-row" onclick="toggleObj(this)"><div class="objection-q">I don't want to deal with setting up new hardware right now.</div><div class="objection-toggle">Show coaching response</div><div class="objection-a">The setup is actually a lot simpler than most people expect — it's plug-and-play and our onboarding team handles the configuration for you. Most groomers are fully live within a day. The reason it's worth doing at the start is that once your payment and booking data are in the same place, it's much harder to migrate later without disruption. Is it the setup time that's the concern, or something else about the timing?</div></div><div class="objection-row" onclick="toggleObj(this)"><div class="objection-q">Can't I just use Venmo or cash for payments?</div><div class="objection-toggle">Show coaching response</div><div class="objection-a">You can, but there are a few things that tend to catch up with groomers over time — it's harder to track revenue accurately, there's no automatic deposit timeline, and some clients hesitate to pay informally for a professional service. MoeGo Pay also lets you store cards on file so you can charge for no-shows automatically. That alone recovers what most groomers are losing every month. Want me to show you what that typically looks like in dollars?</div></div></div></div>`;
+
+const challengerHTML=`<div class="obj-panel-wrap"><div class="obj-panel-header" onclick="togglePanel('challenger')"><div><div class="obj-panel-header-text">Challenger closing roleplay — customer delaying decision</div><div class="obj-panel-header-sub">Manager plays the stalling prospect — click to expand all 4 scenarios</div></div><span id="challenger-arrow" style="font-size:18px;color:var(--color-text-secondary);font-weight:300">+</span></div><div class="obj-panel-body" id="challenger-body"><div style="padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)"><p style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">The challenger approach reframes the cost of inaction, introduces a perspective the customer hadn't considered, and creates constructive tension that drives a decision. The goal is not to pressure — it's to disrupt the status quo in a way that serves the customer.</p></div><div class="objection-row" onclick="toggleObj(this)"><div class="objection-q">I need to think about it.</div><div class="objection-context">Prospect seems engaged but won't commit after the demo.</div><div class="objection-toggle">Show challenger response</div><div class="objection-a"><div class="objection-a-label">Reframe the cost of delay</div>Totally fair — this is a real decision. Can I ask what specifically you're weighing up? I want to make sure you have everything you need. The reason I ask is that most groomers who delay tell us later that they wish they'd started sooner — every week without automated no-show protection and rebooking is revenue that doesn't come back. I'm not trying to rush you, but I'd rather surface any real concerns now than have you sitting on something that could be helping your business today. What's the one thing that would need to be true for you to feel confident moving forward?</div></div><div class="objection-row" onclick="toggleObj(this)"><div class="objection-q">We're too busy right now — maybe next month.</div><div class="objection-context">Prospect is deflecting with timing.</div><div class="objection-toggle">Show challenger response</div><div class="objection-a"><div class="objection-a-label">Challenge the timing assumption</div>I hear that — and honestly, the busiest time is usually when this pays off the most. When you're fully booked, a single no-show or a manual payment issue costs you more than when you're slow. The setup takes less than a day, and our onboarding team does the heavy lifting for you. What tends to happen when people wait until things slow down is that it never feels like the right time. What would actually need to change between now and next month for this to feel more manageable?</div></div><div class="objection-row" onclick="toggleObj(this)"><div class="objection-q">I want to talk to my business partner first.</div><div class="objection-context">Prospect is deferring to a third party.</div><div class="objection-toggle">Show challenger response</div><div class="objection-a"><div class="objection-a-label">Get the stakeholder into the conversation</div>Absolutely — this is the kind of decision worth making together. Can we get them on a quick call this week? I'd rather walk you both through it at the same time than have you relay it secondhand, because the questions usually come up in the moment. Even 20 minutes. What does their schedule look like? If getting them on a call is tough, I can put together a short summary you can share — but I find a live conversation is almost always faster and cleaner for decisions like this.</div></div><div class="objection-row" onclick="toggleObj(this)"><div class="objection-q">I'm not sure this is the right time to invest in new software.</div><div class="objection-context">Prospect is questioning the financial commitment.</div><div class="objection-toggle">Show challenger response</div><div class="objection-a"><div class="objection-a-label">Flip the investment frame</div>I understand the hesitation — and I want to be direct with you. Most groomers frame this as a cost, but the math usually runs the other way. If you're losing two bookings a week to no-shows and your average service is $80, that's over $600 a month walking out the door. MoeGo Pay's no-show protection alone typically covers the cost of the platform. So the question isn't really whether you can afford to invest — it's whether you can afford to keep losing that revenue. Would it help to run those numbers together for your specific situation?</div></div></div></div>`;
+
+const packagesHTML=`<div class="obj-panel-wrap"><div class="obj-panel-header" onclick="togglePanel('packages')"><div><div class="obj-panel-header-text">Package sell roleplay — upsell &amp; right-sizing</div><div class="obj-panel-header-sub">Two scenarios — click to expand</div></div><span id="packages-arrow" style="font-size:18px;color:var(--color-text-secondary);font-weight:300">+</span></div><div class="obj-panel-body" id="packages-body"><div style="padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)"><p style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">The goal of package sell roleplay is to make the AE fluent in leading with value, not price. The right package is the one that solves the most pain — the AE's job is to help the customer see that clearly.</p></div><div style="padding:1rem 1rem 0"><div class="pkg-tabs"><button class="pkg-tab active" onclick="switchPkg('ug',this)">Ultimate vs Growth</button><button class="pkg-tab" onclick="switchPkg('gb',this)">Growth vs Basic</button></div><div class="pkg-scenario active" id="pkg-ug"><div class="objection-row" style="border-top:none;padding-left:0;padding-right:0" onclick="toggleObj(this)"><div class="objection-q">The Growth package looks like it covers what we need — why would we pay more for Ultimate?</div><div class="objection-context">Prospect is anchored on Growth and hesitant to move up.</div><div class="objection-toggle">Show coaching response</div><div class="objection-a"><div class="objection-a-label">Lead with the gap, not the feature list</div>Growth is a great starting point — and for some businesses it's exactly the right fit. The question I'd want to answer for you is: how much of your revenue right now comes from repeat clients vs. new ones? The reason I ask is that Ultimate includes automated rebooking reminders and loyalty tools that typically lift repeat visit rates by 20–30%. For a groomer doing your volume, that's often the difference between hitting your revenue target and chasing it every month. If retention is already a non-issue for you, Growth is probably fine. But if you've ever lost a client because they just didn't come back, Ultimate is the one that fixes that. Would it be worth looking at what that gap actually costs you?</div></div><div class="objection-row" style="padding-left:0;padding-right:0" onclick="toggleObj(this)"><div class="objection-q">I don't need all the extra features — I just want something simple.</div><div class="objection-context">Prospect is feature-averse and undervaluing what Ultimate offers.</div><div class="objection-toggle">Show coaching response</div><div class="objection-a"><div class="objection-a-label">Reframe complexity as automation</div>Totally fair — and the good news is that the features you'd never use just sit in the background. The ones that matter for a business like yours are the ones that run automatically: rebooking reminders go out without you touching them, loyalty rewards apply without you tracking them, and reporting updates itself. The way most of our Ultimate customers describe it is that it actually feels simpler once it's set up, because there are fewer things to remember to do manually. Would it help to see a quick walkthrough of just the three or four things that would actually change your day-to-day?</div></div></div><div class="pkg-scenario" id="pkg-gb"><div class="objection-row" style="border-top:none;padding-left:0;padding-right:0" onclick="toggleObj(this)"><div class="objection-q">Basic has everything I need for now — I can always upgrade later.</div><div class="objection-context">Prospect is defaulting to the lowest tier with a vague upgrade intent.</div><div class="objection-toggle">Show coaching response</div><div class="objection-a"><div class="objection-a-label">Surface the cost of starting small</div>I hear that a lot — and upgrading later is always an option. The thing I'd want you to go in with open eyes on is that most groomers who start on Basic tell us the two things they miss immediately are online booking and automated appointment reminders. Right now, every booking that comes through manually is time your team is spending on the phone instead of with a dog. Growth adds online booking and reminders for a difference that most clients recoup in the first two weeks just from reduced no-shows and admin time. At what point would "I'll upgrade later" actually become "I'm ready to upgrade now"?</div></div><div class="objection-row" style="padding-left:0;padding-right:0" onclick="toggleObj(this)"><div class="objection-q">I'm just starting out — I don't want to overcommit on cost.</div><div class="objection-context">New or small business prospect being cautious about spend.</div><div class="objection-toggle">Show coaching response</div><div class="objection-a"><div class="objection-a-label">Anchor to ROI, not cost difference</div>That makes complete sense — and I respect the discipline. Let me just share one number with you. The average groomer on Basic handles about 30–40% of their bookings manually. When you move to Growth with online booking, that number drops close to zero. If you're spending even 30 minutes a day on manual booking admin, that's roughly 10 hours a month. What's your time worth per hour? For most groomers, the cost difference between Basic and Growth pays for itself in recaptured time alone in the first month — before you even factor in the extra bookings you capture because clients can book at 10pm when they think of it. Does that framing change how you're looking at it?</div></div></div></div><div style="height:1rem"></div></div></div>`;
+
+function switchPkg(id,el){
+  document.querySelectorAll('.pkg-scenario').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.pkg-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pkg-'+id).classList.add('active');
+  el.classList.add('active');
+}
+function togglePanel(id){
+  const body=document.getElementById(id+'-body');
+  const arrow=document.getElementById(id+'-arrow');
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  arrow.textContent=isOpen?'+':'−';
+}
+function toggleObj(row){
+  const a=row.querySelector('.objection-a');
+  const t=row.querySelector('.objection-toggle');
+  const isOpen=a.classList.contains('open');
+  a.classList.toggle('open',!isOpen);
+  const verb=isOpen?'Show':'Hide';
+  const rest=t.textContent.replace(/^Show |^Hide /,'');
+  t.textContent=verb+' '+rest;
+}
+function renderWeekDetail(idx){
+  const d=weekData[idx];
+  const ul=d.items.map((item,i)=>{
+    const done=checks[idx][i];
+    return `<li><div class="check-box ${done?'done':''}" onclick="toggleCheck(${idx},${i})"></div><span class="check-text ${done?'done':''}">${item}</span></li>`;
+  }).join('');
+  document.getElementById('week-detail').innerHTML=`<div class="week-detail-title">${d.title}</div><ul class="checklist">${ul}</ul>`;
+  let actHTML='';
+  if(d.activities.includes('pain')) actHTML+=painFunnelHTML;
+  if(d.activities.includes('objection')) actHTML+=objectionHTML;
+  if(d.activities.includes('challenger')) actHTML+=challengerHTML;
+  if(d.activities.includes('packages')) actHTML+=packagesHTML;
+  document.getElementById('week-activities').innerHTML=actHTML;
+  document.getElementById('week-notes').innerHTML=renderNotes(idx);
+}
+function selectWeek(idx,el){
+  document.querySelectorAll('.week-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  activeWeek=idx;
+  renderWeekDetail(idx);
+}
+function toggleCheck(wi,ii){checks[wi][ii]=!checks[wi][ii];renderWeekDetail(wi);}
+renderWeekDetail(0);
+
+function showTab(name,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+const targets={mrr:8000,deals:36,ultimate:null,demos:48,attach:90,show:75};
+const labels={mrr:'MRR closed',deals:'Deals closed',ultimate:'Ultimate deals sold',demos:'Demos completed',attach:'Hardware attach %',show:'Show rate %'};
+const fmts={mrr:v=>'$'+Math.round(v).toLocaleString(),deals:v=>Math.round(v),ultimate:v=>Math.round(v),demos:v=>Math.round(v),attach:v=>Math.round(v)+'%',show:v=>Math.round(v)+'%'};
+
+function updateTracker(){
+  const vals={
+    mrr:parseFloat(document.getElementById('inp-mrr').value)||0,
+    deals:parseFloat(document.getElementById('inp-deals').value)||0,
+    ultimate:parseFloat(document.getElementById('inp-ultimate').value)||0,
+    demos:parseFloat(document.getElementById('inp-demos').value)||0,
+    attach:parseFloat(document.getElementById('inp-attach').value)||0,
+    show:parseFloat(document.getElementById('inp-show').value)||0
+  };
+  const grid=document.getElementById('tracker-grid');
+  grid.innerHTML=Object.keys(targets).map(k=>{
+    if(k==='ultimate'){
+      const v=vals[k];
+      const dealCount=Math.max(vals['deals'],1);
+      const pct=Math.min(100,Math.round((v/dealCount)*100));
+      const fc=pct>=50?'fill-success':pct>=25?'fill-warning':'fill-danger';
+      const tc=pct>=50?'success':pct>=25?'warn':'danger';
+      return `<div class="tracker-card">
+        <div class="tracker-card-label">Ultimate deals sold</div>
+        <div class="tracker-row">
+          <span style="font-size:13px;font-weight:500">${Math.round(v)}</span>
+          <span class="tracker-nums">${pct}% of closed deals</span>
+        </div>
+        <div class="progress-bar" style="margin-bottom:6px"><div class="progress-fill ${fc}" style="width:${pct}%"></div></div>
+        <span class="tag ${tc}">${pct}% Ultimate mix</span>
+      </div>`;
+    }
+    const pct=Math.min(100,Math.round((vals[k]/targets[k])*100));
+    const fc=pct>=90?'fill-success':pct>=70?'fill-warning':'fill-danger';
+    const tc=pct>=90?'success':pct>=70?'warn':'danger';
+    return `<div class="tracker-card"><div class="tracker-card-label">${labels[k]}</div><div class="tracker-row"><span style="font-size:13px;font-weight:500">${fmts[k](vals[k])}</span><span class="tracker-nums">of ${fmts[k](targets[k])}</span></div><div class="progress-bar" style="margin-bottom:6px"><div class="progress-fill ${fc}" style="width:${pct}%"></div></div><span class="tag ${tc}">${pct}% of target</span></div>`;
+  }).join('');
+
+  const below=Object.keys(targets).filter(k=>k!=='ultimate'&&(vals[k]/targets[k])<0.8);
+  const flag=document.getElementById('coaching-flag');
+  if(below.length===0){
+    flag.innerHTML=`<div style="background:var(--color-background-success);border:0.5px solid var(--color-border-success);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;font-size:13px;color:var(--color-text-success);font-weight:500">All metrics at or above 80% — coaching plan on track.</div>`;
+  } else {
+    const names=below.map(k=>labels[k]).join(', ');
+    flag.innerHTML=`<div style="background:var(--color-background-warning);border:0.5px solid var(--color-border-warning);border-radius:var(--border-radius-lg);padding:1rem 1.25rem"><div style="font-size:13px;font-weight:500;color:var(--color-text-warning);margin-bottom:4px">Coaching intervention needed</div><div style="font-size:13px;color:var(--color-text-secondary)">The following are below 80% pacing and require immediate coaching focus: <strong>${names}</strong>.</div></div>`;
+  }
+}
+updateTracker();
+</script>
