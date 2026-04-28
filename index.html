@@ -202,6 +202,93 @@ tbody tr:hover{background:var(--bg2)}
 .slab{font-size:11px;color:var(--tx2)}
 .ld{padding:1.5rem;text-align:center;font-size:13px;color:var(--tx2)}
 @media(max-width:560px){.mg,.wg,.ng,.tkg,.dg,.og,.sg,.rg{grid-template-columns:1fr}}
+
+/* ── PDF / Print styles ─────────────────────────────────────── */
+@media print{
+  :root{
+    --bg:#fff!important;--bg2:#f5f5f4!important;--bg3:#eeeeec!important;
+    --bdr:rgba(0,0,0,0.15)!important;--bdr2:rgba(0,0,0,0.22)!important;--bdr3:rgba(0,0,0,0.3)!important;
+    --tx:#111!important;--tx2:#444!important;--tx3:#888!important;
+    --ib:#eff6ff!important;--ibd:#bfdbfe!important;--it:#1d4ed8!important;
+    --sb:#f0fdf4!important;--sbd:#bbf7d0!important;--st:#166534!important;
+    --wb:#fffbeb!important;--wbd:#fde68a!important;--wt:#92400e!important;
+    --db:#fff1f2!important;--dbd:#fecdd3!important;--dt:#9f1239!important;
+  }
+  /* Hide interactive chrome */
+  .sw,.pdf-btn,.tabs,.back,.ar,.dvd,.rpill,.rs-btn,
+  #pg-login,#pg-reps,#pg-ld{display:none!important}
+
+  /* Show all content sections */
+  .sec{display:block!important}
+  .pb,.ob,.ps{display:block!important}
+  .ps{display:block!important}
+
+  /* Fix header */
+  .app-hdr{border-bottom:2px solid #111;padding:.6rem 1rem;page-break-after:avoid}
+  .app-hdr h1{font-size:15px}
+  .hdr-r{gap:5px}
+  #hdr-pill{display:none}
+
+  /* Body layout */
+  body{font-size:12px;background:#fff}
+  .body{padding:.75rem 1rem}
+
+  /* Section headings get page-break control */
+  .sh{margin-top:.8rem;font-size:13px;page-break-after:avoid}
+
+  /* Expand all tabs as stacked sections with headings */
+  #t-ov::before{content:'Overview';display:block;font-size:16px;font-weight:700;border-bottom:1.5px solid #111;padding-bottom:4px;margin-bottom:.8rem}
+  #t-co::before{content:'Coaching plan';display:block;font-size:16px;font-weight:700;border-bottom:1.5px solid #111;padding-bottom:4px;margin-bottom:.8rem;margin-top:1.2rem}
+  #t-tr::before{content:'Progress tracker';display:block;font-size:16px;font-weight:700;border-bottom:1.5px solid #111;padding-bottom:4px;margin-bottom:.8rem;margin-top:1.2rem}
+  #t-d3::before{content:'Day 30 review';display:block;font-size:16px;font-weight:700;border-bottom:1.5px solid #111;padding-bottom:4px;margin-bottom:.8rem;margin-top:1.2rem}
+  #t-so::before{content:'Sign-off';display:block;font-size:16px;font-weight:700;border-bottom:1.5px solid #111;padding-bottom:4px;margin-bottom:.8rem;margin-top:1.2rem}
+
+  /* Week section headings */
+  #t-co .wg{display:none}
+  #wd,#wa,#wn2{display:block!important}
+
+  /* Metrics grid — 3 columns on print */
+  .mg{grid-template-columns:repeat(3,1fr)!important}
+  .wg{display:none!important}
+  .tkg{grid-template-columns:repeat(3,1fr)!important}
+  .ng{grid-template-columns:1fr 1fr!important}
+  .dg{grid-template-columns:1fr 1fr!important}
+  .og{grid-template-columns:1fr 1fr!important}
+  .sg{grid-template-columns:1fr 1fr!important}
+
+  /* Tables */
+  table{font-size:11px}
+  thead th{font-size:10px}
+
+  /* Panels — remove toggle arrow, show label */
+  .ph-s{display:none}
+  .pa{display:none}
+
+  /* Tracker inputs — just show the value, not the input box */
+  .ir input{border:none;background:transparent;font-weight:700}
+
+  /* Notes areas */
+  .na{border:1px solid #ccc;min-height:60px}
+
+  /* Page break hints */
+  #t-co,#t-tr,#t-d3,#t-so{page-break-before:always}
+  .pnl{page-break-inside:avoid}
+  .tkc{page-break-inside:avoid}
+  .ocd{page-break-inside:avoid}
+
+  /* Hide week selector hint text */
+  #t-co>.sh:first-child{display:none}
+
+  /* Signature lines */
+  .sl{border-bottom:1px solid #555!important;min-height:28px}
+
+  /* Hide individual week detail during print (replaced by print-coaching-all) */
+  [data-print-hide]{display:none!important}
+  #print-coaching-all{display:block!important}
+
+  /* Print footer */
+  @page{margin:1.5cm;size:A4}
+}
 </style>
 </head>
 <body>
@@ -246,6 +333,7 @@ tbody tr:hover{background:var(--bg2)}
       <div id="hdr-pill"></div>
       <div style="text-align:right"><div style="font-size:12px;font-weight:700" id="hdr-nm"></div><div style="font-size:11px;color:var(--tx2)" id="hdr-rl"></div></div>
       <div class="av" id="hdr-av"></div>
+      <button class="sw pdf-btn" onclick="printPDF()" title="Download as PDF">⬇ PDF</button>
       <button class="sw" onclick="doLogout()">Switch</button>
     </div>
   </div>
@@ -474,6 +562,55 @@ var pH='<div class="pnl"><div class="ph" onclick="tPnl(\'pain\')"><div><div clas
 var oH='<div class="pnl"><div class="ph" onclick="tPnl(\'obj\')"><div><div class="ph-t">MoeGo Pay hardware attach — objection roleplay</div><div class="ph-s">Manager plays the prospect — 4 scenarios</div></div><span id="obj-a" class="pa">+</span></div><div class="ob" id="obj-b"><div class="or" onclick="tObj(this)"><div class="oq">We already have a card reader — we don\'t need another one.</div><div class="ot">Show coaching response</div><div class="oa">Totally understand — a lot of our customers said the same thing before switching. MoeGo Pay hardware is built into the same system you\'re using for bookings, client history, and no-show protection. No manual reconciliation, no split systems, your team doesn\'t touch two different devices. Can I show you how that looks in practice?</div></div><div class="or" onclick="tObj(this)"><div class="oq">I\'m locked into a contract with my current payment processor.</div><div class="ot">Show coaching response</div><div class="oa">When does that contract renew? In some cases the savings from switching actually offset the exit fee. We can set this up now and time the payment side to align with your renewal — no overlap cost. Would it help to look at what the numbers would actually look like?</div></div><div class="or" onclick="tObj(this)"><div class="oq">I don\'t want to deal with setting up new hardware right now.</div><div class="ot">Show coaching response</div><div class="oa">Setup is plug-and-play and our onboarding team handles configuration — most groomers are fully live within a day. Once payment and booking data are in the same place, migrating later is much harder. Is it the setup time that\'s the concern, or something else?</div></div><div class="or" onclick="tObj(this)"><div class="oq">Can\'t I just use Venmo or cash for payments?</div><div class="ot">Show coaching response</div><div class="oa">You can, but things tend to catch up — harder to track revenue accurately, no automatic deposit timeline, and some clients hesitate to pay informally. MoeGo Pay lets you store cards on file to charge for no-shows automatically. That alone recovers what most groomers are losing every month.</div></div></div></div>';
 var cH='<div class="pnl"><div class="ph" onclick="tPnl(\'chal\')"><div><div class="ph-t">Challenger closing roleplay — customer delaying decision</div><div class="ph-s">Manager plays the stalling prospect — 4 scenarios</div></div><span id="chal-a" class="pa">+</span></div><div class="ob" id="chal-b"><div style="padding:10px 13px;border-bottom:1px solid var(--bdr);background:var(--bg2)"><p style="font-size:12px;color:var(--tx2);line-height:1.6">Reframe the cost of inaction, introduce a new perspective, and create constructive tension that drives a decision — without pressure.</p></div><div class="or" onclick="tObj(this)"><div class="oq">I need to think about it.</div><div class="oc">Engaged but won\'t commit after the demo.</div><div class="ot">Show challenger response</div><div class="oa"><div class="oal">Reframe the cost of delay</div>Totally fair. Can I ask what specifically you\'re weighing up? Most groomers who delay tell us they wish they\'d started sooner — every week without automated no-show protection is revenue that doesn\'t come back. What\'s the one thing that would need to be true for you to feel confident moving forward?</div></div><div class="or" onclick="tObj(this)"><div class="oq">We\'re too busy right now — maybe next month.</div><div class="oc">Deflecting with timing.</div><div class="ot">Show challenger response</div><div class="oa"><div class="oal">Challenge the timing assumption</div>The busiest time is usually when this pays off most — a single no-show when fully booked costs more than when you\'re slow. Setup takes less than a day. What would actually need to change between now and next month for this to feel more manageable?</div></div><div class="or" onclick="tObj(this)"><div class="oq">I want to talk to my business partner first.</div><div class="oc">Deferring to a third party.</div><div class="ot">Show challenger response</div><div class="oa"><div class="oal">Get the stakeholder into the conversation</div>Can we get them on a quick call this week? I\'d rather walk you both through it at the same time — questions usually come up in the moment. Even 20 minutes. What does their schedule look like?</div></div><div class="or" onclick="tObj(this)"><div class="oq">I\'m not sure this is the right time to invest in new software.</div><div class="oc">Questioning the financial commitment.</div><div class="ot">Show challenger response</div><div class="oa"><div class="oal">Flip the investment frame</div>Most groomers frame this as a cost, but the math usually runs the other way. Two no-shows a week at $80 average is over $600 a month walking out the door. The question isn\'t whether you can afford to invest — it\'s whether you can afford to keep losing that revenue.</div></div></div></div>';
 var pkH='<div class="pnl"><div class="ph" onclick="tPnl(\'pkg\')"><div><div class="ph-t">Package sell roleplay — upsell &amp; right-sizing</div><div class="ph-s">Two scenarios — click to expand</div></div><span id="pkg-a" class="pa">+</span></div><div class="ob" id="pkg-b"><div style="padding:10px 13px;border-bottom:1px solid var(--bdr);background:var(--bg2)"><p style="font-size:12px;color:var(--tx2);line-height:1.6">Lead with value, not price. The right package solves the most pain — the AE\'s job is to help the customer see that clearly.</p></div><div style="padding:.9rem .9rem 0"><div class="ptabs"><button class="ptab on" onclick="sPkg(\'ug\',this)">Ultimate vs Growth</button><button class="ptab" onclick="sPkg(\'gb\',this)">Growth vs Basic</button></div><div class="ps on" id="ps-ug"><div class="or" style="border-top:none;padding-left:0;padding-right:0" onclick="tObj(this)"><div class="oq">The Growth package looks like it covers what we need — why pay more for Ultimate?</div><div class="oc">Anchored on Growth, hesitant to move up.</div><div class="ot">Show coaching response</div><div class="oa"><div class="oal">Lead with the gap, not the feature list</div>Growth is a great starting point. How much of your revenue comes from repeat clients vs. new ones? Ultimate\'s automated rebooking reminders and loyalty tools typically lift repeat visit rates by 20–30%. If retention is a non-issue, Growth is fine. But if you\'ve ever lost a client because they didn\'t come back, Ultimate fixes that. Would it be worth looking at what that gap costs you?</div></div><div class="or" style="padding-left:0;padding-right:0" onclick="tObj(this)"><div class="oq">I don\'t need all the extra features — I just want something simple.</div><div class="oc">Feature-averse, undervaluing Ultimate.</div><div class="ot">Show coaching response</div><div class="oa"><div class="oal">Reframe complexity as automation</div>The features you\'d never use just sit in the background. The ones that matter run automatically — rebooking reminders go out without you touching them, loyalty rewards apply without tracking. Most Ultimate customers say it feels simpler once set up. Would it help to walk through just the things that would change your day-to-day?</div></div></div><div class="ps" id="ps-gb"><div class="or" style="border-top:none;padding-left:0;padding-right:0" onclick="tObj(this)"><div class="oq">Basic has everything I need for now — I can always upgrade later.</div><div class="oc">Defaulting to lowest tier with vague upgrade intent.</div><div class="ot">Show coaching response</div><div class="oa"><div class="oal">Surface the cost of starting small</div>Upgrading later is always an option. Most groomers who start on Basic immediately miss online booking and automated reminders. Every manual booking is time your team spends on the phone instead of with a dog. Growth adds both for a difference most clients recoup in two weeks. At what point would "I\'ll upgrade later" become "I\'m ready now"?</div></div><div class="or" style="padding-left:0;padding-right:0" onclick="tObj(this)"><div class="oq">I\'m just starting out — I don\'t want to overcommit on cost.</div><div class="oc">New business, cautious about spend.</div><div class="ot">Show coaching response</div><div class="oa"><div class="oal">Anchor to ROI, not cost difference</div>The average groomer on Basic handles 30–40% of bookings manually. Move to Growth with online booking and that drops to near zero. If you\'re spending 30 minutes a day on manual admin, that\'s 10 hours a month. The cost difference pays for itself in recaptured time in the first month — before you factor in bookings clients make at 10pm when they think of it.</div></div></div></div><div style="height:.9rem"></div></div></div>';
+
+function printPDF(){
+  // Before printing: expand all collapsible panels, show all weeks, show all pkg scenarios
+  // so the PDF contains everything
+  var allWeeks=[0,1,2,3];
+  // Render all 4 weeks into hidden print containers
+  var printCoaching=document.getElementById('print-coaching-all');
+  if(!printCoaching){
+    printCoaching=document.createElement('div');
+    printCoaching.id='print-coaching-all';
+    printCoaching.style.display='none';
+    document.getElementById('t-co').appendChild(printCoaching);
+  }
+  var html='';
+  allWeeks.forEach(function(idx){
+    var d=WD[idx],ch=st.checks[idx];
+    html+='<div style="margin-bottom:1.1rem"><div class="wd-t" style="font-size:13px;font-weight:700;margin-bottom:.5rem">'+d.t+'</div>';
+    html+='<ul class="cl">'+d.items.map(function(it,i){return '<li><div class="cb'+(ch[i]?' dn':'')+'"></div><span class="ct'+(ch[i]?' dn':'')+'">'+it+'</span></li>';}).join('')+'</ul></div>';
+    // Activities
+    if(d.acts.indexOf('pain')>=0)html+=pH.replace(/onclick="tPnl[^"]*"/g,'').replace(/onclick="tObj[^"]*"/g,'');
+    if(d.acts.indexOf('obj')>=0)html+=oH.replace(/onclick="tPnl[^"]*"/g,'').replace(/onclick="tObj[^"]*"/g,'');
+    if(d.acts.indexOf('challenger')>=0)html+=cH.replace(/onclick="tPnl[^"]*"/g,'').replace(/onclick="tObj[^"]*"/g,'');
+    if(d.acts.indexOf('packages')>=0)html+=pkH.replace(/onclick="tPnl[^"]*"/g,'').replace(/onclick="[^"]*"/g,'');
+    // Notes
+    var mn=mgrNotes[idx]||'',rn=st.notes.rep[idx]||'';
+    html+='<div class="nw" style="margin-bottom:1rem"><div class="nh"><div class="nh-t">Week '+(idx+1)+' notes</div></div><div class="nb"><div class="ng"><div><div class="ndl"><div class="nd" style="background:#1d4ed8"></div>Manager notes</div><div style="font-size:12px;color:var(--tx2);white-space:pre-wrap;padding:8px;border:1px solid var(--bdr);border-radius:var(--r);min-height:50px">'+mn+'</div></div><div><div class="ndl"><div class="nd" style="background:#166534"></div>Rep notes</div><div style="font-size:12px;color:var(--tx2);white-space:pre-wrap;padding:8px;border:1px solid var(--bdr);border-radius:var(--r);min-height:50px">'+rn+'</div></div></div></div></div>';
+  });
+  printCoaching.innerHTML=html;
+  printCoaching.style.display='block';
+
+  // Hide the normal week detail during print
+  var wd=document.getElementById('wd'),wa=document.getElementById('wa'),wn2=document.getElementById('wn2');
+  if(wd)wd.setAttribute('data-print-hide','1');
+  if(wa)wa.setAttribute('data-print-hide','1');
+  if(wn2)wn2.setAttribute('data-print-hide','1');
+
+  // Set document title to rep name for PDF filename
+  var oldTitle=document.title;
+  document.title='30-Day Coaching Plan — '+cRep;
+
+  window.print();
+
+  // Restore
+  document.title=oldTitle;
+  printCoaching.style.display='none';
+  if(wd)wd.removeAttribute('data-print-hide');
+  if(wa)wa.removeAttribute('data-print-hide');
+  if(wn2)wn2.removeAttribute('data-print-hide');
+}
 
 window.onload=function(){show('pg-login');};
 </script>
